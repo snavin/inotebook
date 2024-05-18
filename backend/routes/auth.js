@@ -20,6 +20,7 @@ router.post(
     }),
   ],
   async (req, res) => {
+    let success= false;
     // obj = {
     //     a : 'thios',
     //     number: 34
@@ -43,7 +44,7 @@ router.post(
     try {
       let user = await User.findOne({ email: req.body.email });
       if (user) {
-        return res.status(400).json({ errors: "User already exists" });
+        return res.status(400).json({success, errors: "User already exists" });
       }
       const salt = await bcrypt.genSalt(10);
       seqPassword = await bcrypt.hash(req.body.password, salt);
@@ -64,11 +65,13 @@ router.post(
       };
       const authToken = jwt.sign(data, JWT_SECRET);
       //console.log(jwtData);
-      res.json(authToken);
+      success=true
+      res.json({success,authToken});
+      
       //.then(user => res.json(user))
     } catch (error) {
       console.log(error.message);
-      res.status(500).json({ errors: "some error occured" });
+      res.status(500).json({success, errors: "some error occured" });
     }
     //.catch(err)=>{console.log(err)
 
@@ -87,6 +90,7 @@ router.post(
     body("password", "password cannot be blank").exists(),
   ],
   async (req, res) => {
+    let success= false;
     //if there are any errors, return bad request and errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -97,14 +101,15 @@ router.post(
     try {
       let user = await User.findOne({ email });
       if (!user) {
-        return res.status(400).json({ errors: "Enter valid credentials" });
+        return res.status(400).json({success, errors: "Enter valid credentials" });
       }
 
       const passwordCompare = await bcrypt.compare(password, user.password);
       if (!passwordCompare) {
+        
         return res
           .status(400)
-          .json({ errors: "Enter valid credentials along with Password" });
+          .json({ success, errors: "Enter valid credentials along with Password" });
       }
 
       const payload = {
@@ -113,7 +118,8 @@ router.post(
         },
       };
       const authToken = jwt.sign(payload, JWT_SECRET);
-      res.json(authToken);
+      success=true
+      res.json({success,authToken});
     } catch (error) {
       console.log(error.message);
       res.status(500).json({ errors: "some error occured" });

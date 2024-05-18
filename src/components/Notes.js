@@ -2,12 +2,19 @@ import React, { useContext, useEffect,useRef,useState} from "react";
 import noteContext from "../context/notes/noteContext";
 import NoteItem from "./NoteItem";
 import AddNote from "./AddNote";
+import {useNavigate} from 'react-router-dom'
 
-const Notes = () => {
+const Notes = (props) => {
     const { notes, getNotes,editNote } = useContext(noteContext);
-    
+    let navigate=useNavigate();
     useEffect(()=>{
+      if(localStorage.getItem('token'))
+      {
         getNotes()
+      }
+      else{
+        navigate("/login");
+      }
     },[])
 
     const ref = useRef(null)
@@ -34,7 +41,7 @@ const Notes = () => {
     
   return (
     <div>
-      <AddNote/>
+      <AddNote showAlert={props.showAlert}/>
         <button type="button" className="btn btn-primary d-none" ref={ref} data-bs-toggle="modal" data-bs-target="#exampleModal">
             Launch demo modal
             </button>
@@ -75,7 +82,7 @@ const Notes = () => {
       
         {notes.length === 0 && "no notes to display"}
         {notes.map((notes) => {
-          return <NoteItem key={notes._id} updateNote={updateNote} notes={notes} />;
+          return <NoteItem key={notes._id} updateNote={updateNote} notes={notes} showAlert={props.showAlert} />;
         })}
       </div>
     </div>
